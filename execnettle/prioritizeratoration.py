@@ -44,7 +44,7 @@ class Prioritizeratoration:
 			for key, value in self._metric_server.scores.items():
 				if value[0] < now-9:
 					self._metric_server.scores[key] = (now, shit_score)
-					print "score should be shit for " + key
+					print("score should be shit for " + key)
 
 	@staticmethod
 	def run_metric_server(self):
@@ -82,7 +82,7 @@ class MetricClient:
 
 	def post(self):
 		while True:
-			print "posting cli message"
+			print("posting cli message")
 			arg = {'time':str(time.time())}
 			arg['loagavg'] = self.loadavg()
 			arg['memusage'] = self.memusage()
@@ -96,14 +96,14 @@ class MetricClient:
 				req = urllib2.Request(url, data)
 				response = urllib2.urlopen(req)
 			except IOError:
-				print "IOError happened!"
+				print("IOError happened!")
 				break
 		return None
 
 
 class MetricHTTPServer(HTTPServer):
 	def __init__( self, *args):
-		super(MetricHTTPServer,self).__init__(*args)
+		HTTPServer.__init__(self, *args)
 		self.scores = {}
 
 class MetricServer(BaseHTTPRequestHandler):
@@ -113,26 +113,27 @@ class MetricServer(BaseHTTPRequestHandler):
 
 ##  this will be where graphs and stuff are rendered....
 	def do_GET(self):
-		print "not what we hoped for"
+		print("not what we hoped for")
 
 	def do_POST(self):
 		length = int(self.headers.getheader('content-length'))
 		post_data = self.rfile.read(length)
 		raw_data = urllib.unquote(post_data)
 		
-		print "received data: " + raw_data
+		print("received data: " + raw_data)
 
 		data = raw_data.split('&')
 		for d in data:
-			self.scores[client_address] = d.split('=')
+			self.server.scores[self.client_address] = d.split('=')
+			print("added key: "+str(self.client_address)+" with val: "+str(self.server.scores[self.client_address]))
 			
 		self.send_response(200)
 
 if __name__=='__main__':
-	print "initing prioritizeratoration"
+	print("initing prioritizeratoration")
 	pri = Prioritizeratoration()
 	pri.init_prioritizeratoration()
-	print "initing client"
+	print("initing client")
 	cli = MetricClient(server='localhost')
 	pri._server_thread.join()
 	pri._check_clients.join()
