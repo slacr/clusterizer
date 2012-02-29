@@ -26,14 +26,31 @@ add
 
 aee02761-a2cd-4458-8d1f-73bc3510f95b
 
+<<<<<<< HEAD
 execnettle
 dir
+=======
+execnettles.py
+file
+>>>>>>> 6ec050040f19a8d5b11d84d53d0ec97fdf3db69e
 
 
 
 add
+<<<<<<< HEAD
 
 README
+=======
+
+
+
+
+
+has-props
+has-prop-mods
+
+prioritizeratoration.py
+>>>>>>> 6ec050040f19a8d5b11d84d53d0ec97fdf3db69e
 file
 
 
