@@ -31,6 +31,7 @@ class Execnettle(object):
 		self._butcher = None
 		self._xfarmer = threading.Event()
 		self._xbutcher = threading.Event()
+		logging.info("Successfully initialized fields")
 		self.initialize()
 
 	def initialize(self):
@@ -88,11 +89,12 @@ class Execnettle(object):
 		self._butcher.join()
 
 	def __str__(self):
-		print("Execnettle instance:")
-		print(" Farmer: "+ self._farmer.name)
-		print(" Butcher: " + self._butcher.name)
-		print(" getq size = " + str(self._getq.qsize()))
-		print(" remq size = " + str(self._remq.qsize()))
+		s = "Execnettle instance:\n"
+		s += " Farmer: " + self._farmer.name + "\n"
+		s += " Butcher: " + self._butcher.name + "\n"
+		s += " getq size = " + str(self._getq.qsize()) + "\n"
+		s += " remq size = " + str(self._remq.qsize()) + "\n"
+		return s
 
 	@staticmethod
 	def startthread(self, src, daemon=False):
