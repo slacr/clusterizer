@@ -4,25 +4,24 @@ from execnettle.execnettles import *
 
 class ExecnettleTests(unittest.TestCase):
 	def setUp(self):
-		
+		self.en = Execnettle() # def constructor		
+		self.en1 = Execnettle(0) # edge 1
+		self.en2 = Execnettle() # edge 1
 
-# 	def watwegot(self):
-# 		print("***********watwegot**************")
-# 		print("we've gota farmer named "+ self._farmer.name)
-# 		print("and a butcher named "+self._butcher.name)
-# 		print("a getq of size " +str(self._getq.qsize()))
-# 		print("a remq of size "+str(self._remq.qsize()))
-# 		print("***********watwegot**************")
-# 
+	def test_str_conversion(self):
+		print(self.en)
+		print(self.en1)
+		print(self.en2)
+
 # 	def multiplier(channel, factor):
 # 		while not channel.isclosed():
 # 			param = channel.receive()
 # 			channel.send(param * factor)
-# 
-# if __name__ == "__main__":
-# 		print("Testing execnettles.py...")
-# 		unittest.main()
-# 
+  
+if __name__ == "__main__":
+	print("Testing execnettles.py...")
+	unittest.main()
+ 
 """
 Test material to cludge:
 

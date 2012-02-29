@@ -1,14 +1,22 @@
 """
 Execnettle is a hostfinding script that dynamically queries the network and
 creates/retrieves new execnet gateways to hosts on the cluster for you.
+
+NOTES
+* Maybe we don't need an entire nmap plugin. We can just have a very short bash
+script that python calls, and we can awk the output or parse xml. (j)
+
+TODO
+* Get constructor running.
+
 """
+
+import execnet, Queue, threading, nmap, logging, sys
 
 """
 Log all logging.info('wat') messages to logs/execnettles.log
 """
 logging.basicConfig(filename='logs/execnettles.log',level=logging.DEBUG)
-
-import execnet, Queue, threading, nmap, time, sys, remote1, logging
 
 class Execnettle(object):
 
@@ -34,10 +42,10 @@ class Execnettle(object):
 		if self._getq or self._remq or self._farmer or self._butcher:
 			logging.error("Previously initialized")
 			return -1
-		self._getq = Queue.Queue(self.nodemax)
+		self._getq = Queue.Queue(self._nodemax)
 		self._remq = Queue.Queue()
-		self._farmer = Execnettle.startthread(self, execnettle.harvestnodes)
-		self._butcher = Execnettle.startthread(self, execnettle.slaughternodes)
+		self._farmer = Execnettle.startthread(self, Execnettle.harvestnodes)
+		self._butcher = Execnettle.startthread(self, Execnettle.slaughternodes)
 
 	def gethost(self, src="", **kwargs):
 		"""
@@ -68,7 +76,7 @@ class Execnettle(object):
 		"""
 		self._remq.put(host, True)
 
-	def terminate(self)
+	def terminate(self):
 		"""
 		Terminate our host acquisition threads.
 		"""
@@ -78,6 +86,13 @@ class Execnettle(object):
 		self._xbutcher.set()
 		self._farmer.join()
 		self._butcher.join()
+
+	def __str__(self):
+		print("Execnettle instance:")
+		print(" Farmer: "+ self._farmer.name)
+		print(" Butcher: " + self._butcher.name)
+		print(" getq size = " + str(self._getq.qsize()))
+		print(" remq size = " + str(self._remq.qsize()))
 
 	@staticmethod
 	def startthread(self, src, daemon=False):
