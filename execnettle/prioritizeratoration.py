@@ -3,22 +3,22 @@ import os
 import threading
 import time
 import urllib
+import urllib2
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 shit_score = -1
 
-class prioritizeratoration:
-	def __init__(self):
+class Prioritizeratoration:
 
 ## we spawn the server and the timed check as threads.
-	def init_prioritizeratoration(self)
-		self._metric_server = threading.thread(run_metric_server)
-		self._metric_server.daemon = daemon
-		self._metric_server.start()
+	def init_prioritizeratoration(self):
+#		self._check_clients = threading.Thread(target=Prioritizeratoration.check_client_relevance, args=(self,))
+#		self._check_clients.start()
 
-		self._check_clients = threading.thread(check_client_relevance, self,)
-		self._check_clients.daemon = daemon
-		self._check_clients.start()
+		self._metric_server = MetricHTTPServer(('', 8080), MetricServer)
+		self._server_thread = self.startthread(self, Prioritizeratoration.run_metric_server)
+
+		self._check_clients = self.startthread(self, Prioritizeratoration.check_client_relevance)
 
 	def get_score(self, key):
 		return self._metric_server.scores.get(key, shit_score)
@@ -28,76 +28,113 @@ class prioritizeratoration:
 ## minute then they get a shit score.
 ## i'm not sure how accurate our ntp settings are across
 ## labs though so for now i give them a 2 minute window
+
+	@staticmethod
+	def startthread(self, sauce, daemon=False):
+		t = threading.Thread(target=sauce, args=(self,))
+		t.daemon=daemon
+		t.start()
+		return t
+
 	@staticmethod
 	def check_client_relevance(self):
 		while True:
-			time.sleep(60)
+			time.sleep(4)
 			now = time.time()
 			for key, value in self._metric_server.scores.items():
-				if value[0] < now-120:
-					self._metric_server.scores[key] = shit_score
+				if value[0] < now-9:
+					self._metric_server.scores[key] = (now, shit_score)
+					print("score should be shit for " + key)
 
 	@staticmethod
-	def run_metric_server():
+	def run_metric_server(self):
 		try:
-			server = HTTPServer(('127.0.0.1', 8080), QueueHttpServer)
-			logger.info('Starting MetricServer')
-			server.serve_forever()
+			for i in range(5):
+				self._metric_server.handle_request()
+				time.sleep(4)
 		except KeyboardInterrupt:
-			logger.info('^C received, shutting down server')
-			server.socket.close()
+			self._metric_server.socket.close()
 	
 
 class MetricClient:
 
-	def __init__(self, port=8080, server=''):
+	def __init__(self, port='8080', server='http://localhost'):
 		self.port=port
 		self.server=server
-		self.post = threading.thread(post, self,)
-		self.post.daemon = daemon
+		self.post = threading.Thread(target=MetricClient.post, args=(self,))
 		self.post.start()
 
-	def loadavg():
+	def loadavg(self):
 		avg = 1
 		return str(avg)
 
-	def memusage():
+	def memusage(self):
 		usg = 2
 		return str(usg)
 
-	def numcpus():
+	def numcpus(self):
 		cpus = 3
 		return str(cpus)
 
-	def numrams():
+	def numrams(self):
 		rams = 4
 		return str(rams)
 
-	def post():
+	def post(self):
 		while True:
-			arg = {'time':str(time.time(), 'loagavg':loadavg(), 
-							'memusage':memusage(), 'numcpus':numcpus(), 
-							'numrams':numrams()}
+			print("posting cli message")
+			arg = {'time':str(time.time())}
+			arg['loagavg'] = self.loadavg()
+			arg['memusage'] = self.memusage()
+			arg['numcpus'] = self.numcpus()
+			arg['numrams'] = self.numrams()
 			try: 
-				u = urllib.urlopen(server+str(port), data=urllib.urlencode(arg)
-				if 199 < u < 300:
-					time.sleep(60)
+				time.sleep(4)
+#				url = self.server+':'+self.port
+				url = 'http://localhost:8080'
+				data = urllib.urlencode(arg)
+				req = urllib2.Request(url, data)
+				response = urllib2.urlopen(req)
 			except IOError:
+				print("IOError happened!")
 				break
+		return None
+
+
+class MetricHTTPServer(HTTPServer):
+	def __init__( self, *args):
+		HTTPServer.__init__(self, *args)
+		self.scores = {}
 
 class MetricServer(BaseHTTPRequestHandler):
 
 ## keys are the src as seen by server; vales are {post_time, score}
 ## for now score is just the add of all fields sent in a given post
-	scores = {}
 
 ##  this will be where graphs and stuff are rendered....
 	def do_GET(self):
-		pass
+		print("not what we hoped for")
 
 	def do_POST(self):
 		length = int(self.headers.getheader('content-length'))
 		post_data = self.rfile.read(length)
 		raw_data = urllib.unquote(post_data)
 		
-		print "received data: " + raw_data
+		print("received data: " + raw_data)
+
+		data = raw_data.split('&')
+		for d in data:
+			self.server.scores[self.client_address] = d.split('=')
+			print("added key: "+str(self.client_address)+" with val: "+str(self.server.scores[self.client_address]))
+			
+		self.send_response(200)
+
+if __name__=='__main__':
+	print("initing prioritizeratoration")
+	pri = Prioritizeratoration()
+	pri.init_prioritizeratoration()
+	print("initing client")
+	cli = MetricClient(server='localhost')
+	pri._server_thread.join()
+	pri._check_clients.join()
+	cli.post.join()
