@@ -140,11 +140,11 @@ class Execnettle(object):
 	def harvestnodes(self):
 		"""
 		Continually scan the specified subnet for port 22 using nmap. Loop over the
-		found hosts, looking for port 22 being open. If so, then 
+		found hosts, looking for port 22 being open. If so, then
 		"""
 		nm = nmap.PortScanner()
 		while not self._xbutcher.is_set():
-			nm.scan(hosts='10.14.20.0/24', arguments='-p 22')
+			nm.scan(hosts='10.14.10.0/24', arguments='-p 22')
 			for h in nm.all_hosts():
 				if self._xbutcher.is_set(): break # XXX
 				if nm[h]['tcp'][22]['state'] == 'open':
